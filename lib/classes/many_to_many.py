@@ -1,11 +1,11 @@
 class Article:
+    all = []  # Class attribute to track all instances of Article
+
     def __init__(self, author, magazine, title):
         self.author = author
         self.magazine = magazine
         self.title = title
-        # Add this article to the author's and magazine's lists
-        author.articles().append(self)
-        magazine.articles().append(self)
+        Article.all.append(self)  # Add the new instance to the `all` list
 
     @property
     def title(self):
@@ -20,17 +20,14 @@ class Article:
         Args:
             value (str): The title of the article.
         
-        Raises:
-            ValueError: If the title is not a string or is outside the length constraints.
-            AttributeError: If the title is attempted to be changed after instantiation.
+        Notes:
+            - If the title is already set, it cannot be changed (immutable).
+            - If the value is not a string or is outside the length constraints, the title remains unchanged.
         """
-        if not isinstance(value, str):
-            raise ValueError("Title must be a string.")
-        if len(value) < 5 or len(value) > 50:
-            raise ValueError("Title must be between 5 and 50 characters.")
         if hasattr(self, "_title"):
-            raise AttributeError("Title cannot be changed after instantiation.")
-        self._title = value
+            return  # Title is immutable after instantiation
+        if isinstance(value, str) and 5 <= len(value) <= 50:
+            self._title = value
 
     @property
     def author(self):
@@ -71,7 +68,6 @@ class Article:
         if not isinstance(value, Magazine):
             raise ValueError("Magazine must be of type Magazine.")
         self._magazine = value
-
 
 
         
