@@ -4,8 +4,19 @@ class Article:
     def __init__(self, author, magazine, title):
         self.author = author
         self.magazine = magazine
-        self.title = title
-        Article.all.append(self)  # Add the new instance to the `all` list
+        self.title = title  # This will call the title setter
+
+        # Add the article to the author's list of articles (if not already present)
+        if self not in author.articles():
+            author.articles().append(self)
+
+        # Add the article to the magazine's list of articles (if not already present)
+        if self not in magazine.articles():
+            magazine.articles().append(self)
+
+        # Add the article to the class-level list (if not already present)
+        if self not in Article.all:
+            Article.all.append(self)
 
     @property
     def title(self):
@@ -21,13 +32,17 @@ class Article:
             value (str): The title of the article.
         
         Notes:
-            - If the title is already set, it cannot be changed (immutable).
-            - If the value is not a string or is outside the length constraints, the title remains unchanged.
+            - The title must be a string between 5 and 50 characters.
+            - The title cannot be changed after instantiation.
+            - Silently ignores invalid assignments (non-string or invalid lengths).
         """
+        if not isinstance(value, str):
+            return  # Silently ignore non-string assignments
+        if len(value) < 5 or len(value) > 50:
+            return  # Silently ignore invalid lengths
         if hasattr(self, "_title"):
             return  # Title is immutable after instantiation
-        if isinstance(value, str) and 5 <= len(value) <= 50:
-            self._title = value
+        self._title = value
 
     @property
     def author(self):
@@ -70,8 +85,6 @@ class Article:
         self._magazine = value
 
 
-        
-
 class Author:
     def __init__(self, name):
         self.name = name
@@ -79,16 +92,27 @@ class Author:
 
     @property
     def name(self):
+        """Returns the author's name."""
         return self._name
 
     @name.setter
     def name(self, value):
+        """
+        Validates and sets the author's name.
+        
+        Args:
+            value (str): The name of the author.
+        
+        Notes:
+            - The name must be a non-empty string.
+            - The name cannot be changed after instantiation.
+        """
         if not isinstance(value, str):
-            raise ValueError("Name must be a string.")
+            return  # Silently ignore non-string assignments
         if len(value) == 0:
-            raise ValueError("Name must be longer than 0 characters.")
+            return  # Silently ignore empty strings
         if hasattr(self, "_name"):
-            raise AttributeError("Name cannot be changed after instantiation.")
+            return  # Name is immutable after instantiation
         self._name = value
 
     def articles(self):
@@ -111,8 +135,7 @@ class Author:
             Article: The newly created article.
         """
         new_article = Article(self, magazine, title)
-        self._articles.append(new_article)
-        return new_article
+        return new_article  # The Article class will handle adding to the author's and magazine's lists
 
     def topic_areas(self):
         """
@@ -125,7 +148,10 @@ class Author:
         if not self._articles:
             return None
         return list(set(magazine.category for magazine in self.magazines()))
-    
+
+
+
+
 
 
 class Magazine:
@@ -151,9 +177,9 @@ class Magazine:
             ValueError: If the name is not a string or is outside the length constraints.
         """
         if not isinstance(value, str):
-            raise ValueError("Name must be a string.")
+            return  # Silently ignore non-string assignments
         if len(value) < 2 or len(value) > 16:
-            raise ValueError("Name must be between 2 and 16 characters.")
+            return  # Silently ignore invalid lengths
         self._name = value
 
     @property
@@ -173,9 +199,9 @@ class Magazine:
             ValueError: If the category is not a string or is empty.
         """
         if not isinstance(value, str):
-            raise ValueError("Category must be a string.")
+            return  # Silently ignore non-string assignments
         if len(value) == 0:
-            raise ValueError("Category must be longer than 0 characters.")
+            return  # Silently ignore empty strings
         self._category = value
 
     def articles(self):
@@ -216,5 +242,32 @@ class Magazine:
             author = article.author
             author_counts[author] = author_counts.get(author, 0) + 1
         return [author for author, count in author_counts.items() if count > 2] or None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
